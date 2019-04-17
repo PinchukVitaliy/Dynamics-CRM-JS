@@ -1,0 +1,660 @@
+function VisibilityDisable()
+{
+	debugger
+	var valueOpSet = Xrm.Page.getAttribute("new_optionalfieldop").getValue();
+	var tabGeneral = "{7fb8eaaa-eed5-423f-9eae-a89a1e69d92c}";
+
+	if(valueOpSet == 279640001)
+	{
+		Xrm.Page.getAttribute("new_text2").setRequiredLevel("required");
+		Xrm.Page.ui.tabs.get(tabGeneral).setVisible(true); 
+	}else 
+		if(valueOpSet == 279640002)
+	{
+		Xrm.Page.ui.tabs.get(tabGeneral).setVisible(false); 
+	}else 
+		if(valueOpSet == 279640003)
+	{
+		Xrm.Page.ui.tabs.get("tab_4").sections.get("tab_4_section_2").setVisible(true);
+	}else 
+		if(valueOpSet == 279640004)
+	{
+		Xrm.Page.ui.tabs.get("tab_4").sections.get("tab_4_section_2").setVisible(false);
+	}
+	else 
+		if(valueOpSet == 279640005)
+	{
+		var triage = Xrm.Page.ui.tabs.get(tabGeneral);
+		triage.sections.forEach(function (section, sectionIndex) {
+			section.controls.forEach(function (control, controlIndex) 
+			{			
+				if (control &&!control.getDisabled()) 
+				{ 
+					 control.setDisabled(true); 
+				} 
+			});
+		});
+	}
+	else 
+		if(valueOpSet == 279640006)
+	{
+		var triage = Xrm.Page.ui.tabs.get(tabGeneral);
+		triage.sections.forEach(function (section, sectionIndex) {
+			section.controls.forEach(function (control, controlIndex) 
+			{			
+				if (control && control.getDisabled()) 
+				{ 
+					 control.setDisabled(false); 
+				} 
+			});
+		});
+	}
+	else 
+		if(valueOpSet == 279640007)
+	{
+		var section = Xrm.Page.ui.tabs.get("tab_4").sections.get("tab_4_section_2");
+
+			section.controls.forEach(function (control, controlIndex) 
+			{			
+				if (control &&!control.getDisabled()) 
+				{ 
+					 control.setDisabled(true); 
+				} 
+			});
+	}
+	else 
+		if(valueOpSet == 279640008)
+	{
+		var section = Xrm.Page.ui.tabs.get("tab_4").sections.get("tab_4_section_2");
+
+			section.controls.forEach(function (control, controlIndex) 
+			{			
+				if (control && control.getDisabled()) 
+				{ 
+					 control.setDisabled(false); 
+				} 
+			});
+	}
+	else 
+		if(valueOpSet == 279640009)
+	{
+		var ctrlName = Xrm.Page.ui.controls.get();
+		for(var i in ctrlName) 
+		{
+	         var ctrl = ctrlName[i];
+	         console.log(ctrl.getName());
+	    }
+		Xrm.Page.getControl("new_text").setDisabled(true);  
+		Xrm.Page.getControl("new_boolean").setVisible(false);           
+	}
+}
+
+function NewForm()
+{
+	var listForms = Xrm.Page.ui.formSelector.items.get(); 
+	var valueTypeForm = Xrm.Page.ui.getFormType(); 	
+	var nameCurrentForm = Xrm.Page.ui.formSelector.getCurrentItem().getLabel(); // текущая форма
+
+			if(valueTypeForm == 1 && nameCurrentForm != "Information")
+			{
+				for(var i in listForms) 
+				{
+					if(listForms[i].getLabel() == "Information")
+					{
+						listForms[i].navigate();
+						console.log("Create");
+						return;
+					}
+				}
+			}
+			if(valueTypeForm == 2)
+			{		
+				console.log("Update");
+			}
+   
+}
+
+
+function fieldBold()
+{
+	var strTextField =Xrm.Page.data.entity.attributes.get("new_text").getValue();
+	var result = strTextField.fontcolor("green").italics().bold();
+	document.getElementById("new_text").innerHTML = result;
+	
+}
+
+
+function CustomerViewLooKup()
+{
+
+	var fetchXml = '<fetch version="1.0" output-format="xml-platform" mapping="logical" distinct="false">'+
+   '<entity name="account">'+
+    '<attribute name="name" />'+
+    '<attribute name="primarycontactid" />'+
+    '<attribute name="telephone1" />'+
+    '<attribute name="accountid" />'+
+    '<order attribute="name" descending="false" />'+
+    '<filter type="and">'+
+      '<condition attribute="telephone1" operator="not-null" />'+
+    '</filter>'+
+  '</entity>'+
+'</fetch>';
+	
+		var viewId = "{00000000-0000-0000-0000-000000000001}"; 	// dummy id
+		var viewDisplayName = "Account Main Phone";
+		var viewIsDefault = true;	//будет ли вьюха дефолтной
+			//вид отображения результатов
+		var layoutXml = "<grid name='resultset' object='10030' jump='account' select='1' icon='1' preview='1'>" +
+                "<row name='result' id='account'>" +
+                "<cell name='name' width='200' />" +
+                "<cell name='telephone1' width='150' />" +
+                "</row>" +
+                "</grid>";
+			//собственно вешаем вьюху на лукап
+		Xrm.Page.getControl("new_lookupaccount").addCustomView(viewId, "account", viewDisplayName, fetchXml, layoutXml, viewIsDefault);
+		Xrm.Page.getControl("new_lookupaccount").setDefaultView(viewId);
+}
+
+
+
+function CustomerSubGrid(){
+	 
+	
+	//var gridid = Xrm.Page.getControl('Contacts_organization');
+	var gridid = document.getElementById('Contacts_organization');
+	var lookupField = new Array;
+	lookupField =Xrm.Page.getAttribute("new_lookupaccount").getValue();
+	
+	if(lookupField != null){
+	   var lookupId = lookupField[0].id;
+		//lookupId = lookupId.replace("{","");
+		//lookupId = lookupId.replace("}","");
+	   //var lookupName = lookupField[0].name;
+	}else{
+		return;
+	}
+	
+	if(gridid == null || gridid.length == 0)//gridid.readyState!= "complete")
+	{
+		setTimeout(CustomerSubGrid, 2000); //рекурсия
+		return;
+	}
+	debugger
+	var fetchXml = '<fetch version="1.0" output-format="xml-platform" mapping="logical" distinct="false">'+
+  '<entity name="contact">'+
+   '<attribute name="fullname" />'+
+   '<attribute name="telephone1" />'+
+   '<attribute name="contactid" />'+
+   '<order attribute="fullname" descending="false" />'+
+   '<filter type="and">'+
+   '<condition attribute="parentcustomerid" operator="eq" uitype="account" value="'+lookupId+'" />'+
+   '</filter>'+
+  '</entity>'+
+'</fetch>';
+
+	gridid.control.SetParameter('fetchxml', fetchXml);
+	gridid.control.Refresh();
+}
+
+
+///////Task 3
+function XrmFetch()
+{
+	var valueOpSet = Xrm.Page.getAttribute("new_xrmserviceop").getValue();
+	
+
+	if(valueOpSet == 279640000)
+	{
+		CreateService();
+		//CreateContactSVC();
+	}else 
+		if(valueOpSet == 279640001)
+	{
+		UpdateFieldContact();
+		alert("Ok");
+	}else 
+		if(valueOpSet == 279640002)
+	{
+		 Active();
+		 alert("Ok");
+	}else 
+		if(valueOpSet == 279640003)
+	{
+		 Deactive();
+		 alert("Ok");
+	}else 
+		if(valueOpSet == 279640004)
+	{
+		 AllRoles();
+	}else 
+		if(valueOpSet == 279640005)
+	{
+		 showResult();
+	}
+}
+
+function showResult()
+{
+	debugger
+	var fetchXml =
+"<fetch version='1.0' output-format='xml-platform' mapping='logical' distinct='false'>"+
+"  <entity name='contact'>"+
+"    <attribute name='fullname' />"+
+"    <attribute name='telephone1' />"+
+"    <attribute name='contactid' />"+
+"    <order attribute='fullname' descending='false' />"+
+"    <filter type='and'>"+
+"      <condition attribute='createdon' operator='last-year' />"+
+"    </filter>"+
+"  </entity>"+
+"</fetch>";
+
+	var result = XrmServiceToolkit.Soap.Fetch(fetchXml);
+	if(result != null && result.length < 200)
+	{
+		CreateService(); // creat contact
+		alert("Entity Created");
+	}else{
+		alert("Already created records: "+result.length);
+	}
+}	
+function AllRoles()
+{
+	debugger
+	var user = new XrmServiceToolkit.Soap.GetCurrentUserRoles();
+	
+	var str ="";
+	for(var role in user)
+	{
+		str+=user[role]+"\n";
+	}
+	alert(str);
+	
+}
+function Deactive()
+{		
+
+debugger
+	//https://education.crm2016.uds.systems/main.aspx?area=nav_conts&etc=2&page=SFA&pageType=EntityList&web=true#17937468
+	var idBenSeverContact ="{B015A3E9-3345-E811-8108-00155D05FA01}";
+	XrmServiceToolkit.Soap.SetState("account", idBenSeverContact , 1, 2, true);
+	Xrm.Page.data.refresh(true).then(null, null);
+}
+function Active()
+{		
+debugger
+	//Xrm.Page.data.entity.getId() ={5D23A40E-2043-E911-8115-00155D05FA01} мой id
+	var idBenSeverContact ="{B015A3E9-3345-E811-8108-00155D05FA01}";
+	XrmServiceToolkit.Soap.SetState("account", idBenSeverContact, 0, 1, true);
+	Xrm.Page.data.refresh(true).then(null, null);
+}
+
+
+function CreateContactSVC()
+{
+	debugger
+	var record = {
+				id: "{FDBD087B-0000-0000-8110-00155D05FA01}",
+                fullname : 'Testing Contact Pink', 
+                parentcustomerid: {        //Lookup
+                        Id: '{EA2F2317-4625-E811-8108-00155D05FA01}', LogicalName: "account" }
+	};
+			 debugger 
+               XrmSvcToolkit.createRecord({
+                entityName: "contact",  
+			   entity: record, //{new_name : 'Testing Contact Pink'}, 
+                async: false,  
+                successCallback: function (result) {
+                   alert("Record Created successfully...");
+                },
+                errorCallback: function (error) {
+                    alert("Failed to create record..");
+                }
+          });
+	
+}
+function CreateService()
+{
+	debugger
+		var entity = new XrmServiceToolkit.Soap.BusinessEntity("contact");
+		entity.attributes["lastname"] = "Pink XrmServiceToolkit";
+		//Create Entity
+		//var entity = new XrmServiceToolkit.Soap.BusinessEntity("new_pinktest");
+		//String
+		//entity.attributes["new_name"] = "XrmServiceToolkit";
+		//Lookup
+		//entity.attributes['fieldName'] = { id : Xrm.Page.getAttribute('fieldName').getValue()[0].id, logicalName : Xrm.Page.getAttribute('fieldName').getValue()[0].entityType, type : 'EntityReference' };
+		//Bool
+		//entity.attributes["fieldName"] = Xrm.Page.getAttribute("fieldName").getValue();
+		//OptionSetValue
+		//entity.attributes["fieldName"] = { value: Xrm.Page.getAttribute("fieldName").getValue(), type: "OptionSetValue" };
+		//Currency
+		//entity.attributes["fieldName"] = { Value: Xrm.Page.data.entity.attributes.get("fieldName").getValue() };
+		// [Language=Javascript]
+		//Decimal
+		//entity.attributes["fieldName"] = { Value: parseFloat(eval(Xrm.Page.data.entity.attributes.get("fieldName").getValue())) };
+		var quoteId;
+		quoteId = XrmServiceToolkit.Soap.Create(entity);
+}
+//update no 
+function UpdateFieldContact()
+{
+	debugger
+	var id =Xrm.Page.data.entity.getId();
+	var updateField = new XrmServiceToolkit.Soap.BusinessEntity("new_pinktest", id);
+		//updateField.logicalName = "new_pinktest";
+		//updateField.id = id;
+		updateField.attributes["new_text2"]= "Hello";
+	var quoteId;	
+        quoteId = XrmServiceToolkit.Soap.Update(updateField);	
+///////////////////////
+		//var updateEntity = new XrmServiceToolkit.Soap.BusinessEntity("new_pinktest", id);
+		//Lookup to update
+		//updateEntity.attributes["fieldName"] = { id : entityGuid, logicalName : 'entityName', type : 'EntityReference' };
+		//OptionSet
+		//updateEntity.attributes["fieldName"] = { value : entityGuid, type : 'OptionSetValue' };
+		//Currency
+		//updateEntity.attributes["fieldName"] = { value : entityGuid, type : 'Money' };
+		//Boolean
+		//updateEntity.attributes["fieldName"] = { value : true };
+		//var updateResponse = XrmServiceToolkit.Soap.Update(updateEntity );		
+}
+
+////////////////////////////////////////////////////
+function AgrigationFuc()
+{
+	var valueOpSet = Xrm.Page.getAttribute("new_agrigationfunk").getValue();
+	
+
+	if(valueOpSet == 279640000)
+	{
+		AgrOne();
+	}else 
+		if(valueOpSet == 279640001)
+	{
+		AgrSortAndGroup();
+	}else 
+		if(valueOpSet == 279640002)
+	{
+		
+		AgrSort();
+	}
+	
+}
+
+function AgrOne()
+{
+	debugger
+	var fetchXml = 
+"<fetch version='1.0' output-format='xml-platform' mapping='logical' distinct='false' aggregate='true' >"+
+"  <entity name='new_pinktest'>"+
+"  <attribute name='new_floatfield' alias='record_sum' aggregate='sum'/>"+
+"  <attribute name='new_floatfield' alias='record_min' aggregate='min'/>"+
+"  <attribute name='new_floatfield' alias='record_avg' aggregate='avg'/>"+
+"  </entity>"+
+"</fetch>";
+		
+		var result = XrmServiceToolkit.Soap.Fetch(fetchXml);
+		
+		if(result != null)
+		{
+		var sum = result[0].attributes["record_sum"].value; 
+		var min = result[0].attributes["record_min"].value; 
+		var avg = result[0].attributes["record_avg"].value; 
+		alert("sum-"+sum+" min-"+min+" avg-"+avg);
+		}
+
+}
+function AgrSortAndGroup()
+{
+	debugger
+	var fetchXml = 
+"<fetch version='1.0' output-format='xml-platform' mapping='logical' distinct='false' aggregate='true' >"+
+"  <entity name='new_pinktest'>"+
+"    <attribute name='transactioncurrencyid' alias='new_pinktest_count' aggregate='countcolumn' />"+
+"    <attribute name='new_globaloptionset' alias='new_globaloptionset' groupby='true'/>"+
+"  </entity>"+
+"</fetch>"
+		
+		var result = XrmServiceToolkit.Soap.Fetch(fetchXml);
+		
+		if(result != null)
+		{
+			var countcolumn = result[0].attributes["new_pinktest_count"].value; 
+			alert("countcolumn-"+countcolumn);
+		}
+
+}
+function AgrSort()
+{
+	debugger
+	var fetchXml = 
+"<fetch version='1.0' output-format='xml-platform' mapping='logical' distinct='false' aggregate='true'>"+
+"  <entity name='new_pinktest'>"+
+"  <attribute name='new_name' alias='new_name_count' aggregate='count'/>"+
+"   <order attribute='new_name' descending='false' />"+
+"  </entity>"+
+"</fetch>"
+		var result = XrmServiceToolkit.Soap.Fetch(fetchXml);
+		
+		if(result != null)
+		{
+			var count = result[0].attributes["new_name_count"].value; 
+			alert("Count-"+count);
+		}
+
+}
+//new_twobpf  var activeStage = Xrm.Page.data.process.getActiveStage();
+
+function BPF()
+{
+	debugger
+	//var process =Xrm.Page.getAttribute("new_twobpf").getValue();
+	var activeProcess = Xrm.Page.data.process.getActiveProcess().getName();
+	if(activeProcess != "PinkBPFTwo")
+	{
+		Xrm.Page.data.process.setActiveProcess("{D7FA4B2E-072F-4B26-B88F-54568057ED23}");
+	}
+	else
+	{
+		Xrm.Page.data.process.setActiveProcess("{E8D38F9B-6AA1-4BF0-B633-4347DE9BD8AA}");
+	}
+}
+function Next()
+{
+	debugger
+		//var activeStage = Xrm.Page.data.process.getActiveStage().getName();
+		//if(activeStage == "New Stage")
+		//{
+			//var txt = Xrm.Page.getAttribute("new_text2").txt.SetValue("hi");
+			
+		//}	
+		Xrm.Page.data.process.moveNext();
+}
+function Previous()
+{
+		Xrm.Page.data.process.movePrevious();
+}
+
+//ribbon
+function RibonDeactive(ControlList)
+{
+	debugger
+	var str ="";
+	for(var entity in ControlList)
+	{			
+		str+=Deactive(ControlList[entity]);
+	}
+	if(str != "")
+	{
+		var ref = confirm("Confirm Deactivation \n"+
+				"The selected entries contain a link to the account. Continue the deactivation? \n"+
+				"======================================\n"+str+
+				"======================================"+ 
+				"\n You can reactivate it later, if you wish.\n"+
+				"This action will change the status of the selected Pink_Test to Inactive.");
+		if(ref)
+		{
+			for(var entity in ControlList)
+			{						
+				XrmServiceToolkit.Soap.SetState("new_pinktest", ControlList[entity], 1, 2, true);				 
+			}
+		}else{return;}
+	}else{
+		for(var entity in ControlList)
+			{			
+				XrmServiceToolkit.Soap.SetState("new_pinktest", ControlList[entity], 1, 2, true);	
+			}
+	}
+		setTimeout(function () {document.getElementById("crmGrid").control.refresh(); }, 1500);
+}
+
+function Deactive(id)
+{
+	debugger
+	var fetchXml = 
+"<fetch version='1.0' output-format='xml-platform' mapping='logical' distinct='false'>"+
+"  <entity name='new_pinktest'>"+
+"    <filter type='and'>"+
+"      <condition attribute='new_pinktestid' operator='eq' uitype='new_pinktest' value='"+id+"' />"+
+"      <filter type='or'>"+
+"        <condition attribute='new_lookupaccount' operator='not-null' />"+
+"        <condition attribute='new_lookuppinktest2' operator='not-null' />"+
+"      </filter>"+
+"    </filter>"+
+"  </entity>"+
+"</fetch>";
+	var result = XrmServiceToolkit.Soap.Fetch(fetchXml);
+	if(result != null && result.length > 0)
+	{
+		return result[0].attributes.new_name.value+"\n";		 
+	}else
+	{
+		return "";
+	}
+}
+
+//task6
+function GetAllField()
+{
+	//debugger
+	var Xrm = parent.opener.Xrm;
+	var bodyTable = "";
+		
+	var ctrlName = Xrm.Page.ui.controls.get();
+		for(var i in ctrlName) 
+		{
+	         var ctrl = ctrlName[i];
+			 if(ctrl.getName()=="new_name" || ctrl.getName()=="new_stepmove" || ctrl.getName()=="new_stepprevious" ||
+			 ctrl.getName()=="new_optionalfieldop" ||  ctrl.getName()=="new_text2" ||  ctrl.getName()=="new_lookuppinktest2" ||
+			 ctrl.getName()=="new_globaloptionset" ||  ctrl.getName()=="new_datetime" ||  ctrl.getName()=="new_lookupaccount" ||
+			 ctrl.getName()=="new_xrmserviceop" ||  ctrl.getName()=="new_agrigationfunk" || ctrl.getName()=="new_floatfield" ||
+			 ctrl.getName()=="new_text" )
+			 {
+				bodyTable+="<tr><td>"+ctrl.getLabel()+"</td><td><input name='"+ctrl.getName()+"' type='checkbox' ></td></tr>";
+			 }
+	    }
+		
+		
+	var p = document.getElementById("result");
+	var resulBody = 
+	"<table>"+
+	"<tr>"+
+    "<th>Name Field</th>"+
+    "<th>Required</th>"+
+	"</tr>" + bodyTable + "</table>";
+	p.innerHTML = resulBody;
+	//window.localStorage.removeItem('jsonArray');
+	//window.localStorage.removeItem('dataWebResource');
+	window.localStorage.setItem("dataWebResource", resulBody);
+}
+
+function OpenWebResource()
+{
+	//debugger		  
+	Xrm.Utility.openWebResource("new_PinkResourseHTML", null, 600, 600);
+}
+
+function LoadCaseResurce() 
+{
+	//debugger
+	GetAllField();
+	var strBody = window.localStorage.getItem("dataWebResource");
+	document.getElementById("result").innerHTML = strBody;
+
+}
+
+function DisabledFields()
+{
+	//debugger
+	var pluginArrayArg = new Array(); 
+	var fields = document.getElementById('result');
+	var aElements = fields.getElementsByTagName('input');
+	for (var i = 0; i < aElements.length; i++) 
+	{
+        if (aElements[i].type == 'checkbox' && aElements[i].checked==true) 
+		{
+			console.log(aElements[i].name+"\n");
+			pluginArrayArg.push(aElements[i].name);
+        }
+    }	
+	window.localStorage.setItem("jsonArray", JSON.stringify(pluginArrayArg));
+	//window.localStorage.removeItem('dataWebResource');
+	RequiredFields();	
+	close();
+}
+
+ 
+
+function RequiredFields()
+{
+	//debugger
+	var requiredFields =JSON.parse(localStorage.getItem("jsonArray"));
+	for(var elem in requiredFields)
+	{
+		parent.opener.Xrm.Page.getAttribute(requiredFields[elem]).setRequiredLevel("required");
+	}
+	//localStorage.removeItem('jsonArray');
+}
+
+function ActionDeactive()
+{
+    var testId = Xrm.Page.data.entity.getId();
+    ExecuteDeactiveEntitys(testId);
+}
+function ExecuteDeactiveEntitys(testId)
+{
+    var ref = confirm("Вы действительно хотите деактивировать все связанные записи Child Entity?");
+    if (ref)
+    {
+        item = testId.replace("{", "");
+        item = item.replace("}", "");
+        item = item.toLowerCase();
+        var organizationUrl = Xrm.Page.context.getClientUrl();
+        var data = {
+
+            "InputColectinEntity": item
+        };
+        
+        var query = "new_PinkActionSecond";
+        var req = new XMLHttpRequest();
+        req.open("POST", organizationUrl + "/api/data/v8.0/" + query, true);
+        req.setRequestHeader("Accept", "application/json");
+        req.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+        req.setRequestHeader("OData-MaxVersion", "4.0");
+        req.setRequestHeader("OData-Version", "4.0");
+        req.onreadystatechange = function () {
+            if (this.readyState == 4) {
+                req.onreadystatechange = null;
+                if (this.status == 200) {
+                    var data = JSON.parse(this.response);
+
+                } else {
+                    var error = JSON.parse(this.response).error;
+                    alert(error.message);
+                }
+            }
+        };
+        req.send(window.JSON.stringify(data));
+    }
+}
